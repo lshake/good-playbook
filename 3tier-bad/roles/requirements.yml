@@ -1,0 +1,19 @@
+#- name: pgsql_install
+#  scm: git
+#  version: v0.1.0
+#  src: git@gitlab.home.shakey.org:/ansible/pgsql_install.git
+
+#- name: pgsql_database
+#  scm: git
+#  version: v0.1.0
+#  src: git@gitlab.home.shakey.org:/ansible/pgsql_database.git
+
+#- name: pgsql_standby
+#  scm: git
+#  version: v0.1.0
+#  src: git@gitlab.home.shakey.org:/ansible/pgsql_standby.git
+
+- name: yum-repos
+  scm: git
+  version: v0.1.1
+  src: git@gitlab.home.shakey.org:/ansible/yum-repos.git
