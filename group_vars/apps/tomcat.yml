@@ -1,0 +1,2 @@
+---
+apps_web_root: "/var/lib/tomcat/webapps/{{ app_root }}"

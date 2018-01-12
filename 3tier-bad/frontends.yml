@@ -1,0 +1,33 @@
+---
+- name: deploy haproxy
+  hosts: frontends
+
+  tasks:
+  - name: install frontend packages
+    yum:
+      name: haproxy 
+      state: latest
+    with_items:
+        - httpie
+        - haproxy
+    become: true
+
+  - name: enable haproxy at boot
+    service:
+      name: haproxy
+      enabled: true
+    become: true
+
+  - name: configure haproxy
+    template:
+      src: haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify: restart haproxy
+    become: true
+
+  handlers:
+  - name: restart haproxy
+    service:
+        name: haproxy
+        state: restarted    
+    become: true

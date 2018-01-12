@@ -1,0 +1,4 @@
+---
+tomcat_port: 8080
+app_root: "ansible/"
+tomcat_test_string: "3456773423765344536"

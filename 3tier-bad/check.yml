@@ -1,0 +1,93 @@
+---
+- name: check app servers
+  hosts: apps
+
+  tasks:
+  - name: check that tomcat is listening on the port
+    wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: "{{ tomcat_port }}"
+        delay: 1
+        timeout: 5
+    delegate_to: bastion
+    register: check_tomcat_port
+    tags: check_tomcat
+
+  - name: check that tomcat is serving the page
+    uri:
+        url: "http://{{ inventory_hostname }}:{{ tomcat_port }}/{{ app_root }}"
+        status_code: 200
+        return_content: yes
+    delegate_to: bastion    
+    register: check_tomcat_webpage
+    tags: check_tomcat
+
+  - name: fail if we didn't get the expected result from tomcat
+    fail:
+        msg: "Failed to get web check token on {{ check_tomcat_webpage.url }}"
+    when: tomcat_test_string not in check_tomcat_webpage.content
+    tags: check_tomcat    
+
+- name: check frontend servers
+  hosts: frontends
+
+  tasks:
+  - name: check that haproxy is listening on the port
+    wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: "{{ haproxy_port }}"
+        delay: 1
+        timeout: 5
+    delegate_to: bastion
+    register: check_haproxy_port
+    tags: check_haproxy
+
+  - name: check that tomcat is serving the page via haproxy
+    uri:
+        url: "http://{{ inventory_hostname }}:{{ haproxy_port }}/{{ app_root }}"
+        headers:
+            Cookie: "SERVERID={{ hostvars[item]['inventory_hostname'] }}"
+        status_code: 200
+        return_content: yes
+    delegate_to: bastion    
+    register: check_haproxy_webpage
+    with_items: "{{ groups['apps'] }}"
+    tags: check_haproxy
+
+  - name: fail if we didn't get the expected result from haproxy
+    fail:
+        msg: "Failed to get web check token on {{ item.url }} for {{ item.item }} "
+    when: tomcat_test_string not in item.content
+    with_items: "{{ check_haproxy_webpage.results }}"
+    tags: check_haproxy
+
+- name: check database servers
+  hosts: appdbs
+
+  vars: 
+    date_check: "{{ ansible_date_time.date }}"
+
+  tasks:
+  - name: check that postgres is listening on the port
+    wait_for:
+        host: "127.0.0.1"
+        port: "5432"
+        delay: 1
+        timeout: 5
+    register: check_postgres_port
+    tags: check_postgres
+
+  - name: test we connect and execute a query 
+    command: psql -c 'SELECT CURRENT_DATE;'
+    become_user: postgres
+    become: true
+    changed_when: false
+    register: check_postgres_query
+    tags: check_postgres
+
+
+  - name: fail if we didn't get the expected result from postgres
+    fail:
+        msg: "Failed to get database check token"
+    when: date_check not in check_postgres_query.stdout
+    tags: check_postgres

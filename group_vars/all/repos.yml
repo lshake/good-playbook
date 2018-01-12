@@ -1,0 +1,18 @@
+---
+yum_repos:
+  - name: rhel-7-server-rpms
+    description: Red Hat Enterprise Linux 7    
+    baseurl: 
+      - "{{ yum_package_host }}/rhel-7-server-rpms"
+  - name: rhel-7-server-rh-common-rpms
+    description: Red Hat Enterprise Linux 7 Common
+    baseurl: 
+      - "{{ yum_package_host }}/rhel-7-server-rh-common-rpms"
+  - name: rhel-7-server-extras-rpms
+    description: Red Hat Enterprise Linux 7 Extras
+    baseurl: 
+      - "{{ yum_package_host }}/rhel-7-server-extras-rpms"
+  - name: rhel-7-server-optional-rpms
+    description: Red Hat Enterprise Linux 7 Optional
+    baseurl: 
+      - "{{ yum_package_host }}/rhel-7-server-optional-rpms"

@@ -17,13 +17,15 @@ defaults
         timeout server 50000
 
 frontend hafrontend
-    bind *:80
+    bind *:{{ haproxy_port }}
     mode http
     default_backend app-servers
 
 backend app-servers
     mode http
     balance roundrobin
-    option forwardfor
-    server app1 app1.{{GUID}}.internal:8080 cookie app1 check
-    server app2 app2.{{GUID}}.internal:8080 cookie app2 check
+    option forwardfor 
+    cookie SERVERID insert indirect nocache
+    {% for item in groups['apps'] | default ([]) %}
+    server {{ hostvars[item]['inventory_hostname'] }} {{ hostvars[item]['ansible_nodename'] }}:{{ tomcat_port }} cookie {{ hostvars[item]['inventory_hostname'] }} check
+    {% endfor %}

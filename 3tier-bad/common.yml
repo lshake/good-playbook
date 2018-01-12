@@ -1,0 +1,41 @@
+---
+- name: common configuration for all machines
+  hosts: internal
+
+  roles: 
+    - { role: yum-repos, repos: "{{ yum_repos }}" }
+    - geerlingguy.repo-epel
+
+  tasks: 
+    - name: upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+      register: packages
+      become: yes
+
+    - name: check for reboot hint
+      shell: LAST_KERNEL=$(rpm -q --last kernel | cut -d '-' -f2,3 | cut -d ' ' -f1 | head -1); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ];then echo 'reboot'; else echo 'no'; fi
+      ignore_errors: true
+      changed_when: false
+      register: reboot_hint
+
+    - name: restart machine
+      shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+      async: 1
+      poll: 0
+      become: yes
+      ignore_errors: yes
+      when: reboot_hint.stdout.find("reboot") != -1
+      register: rebooting
+
+    - name: wait for server to come back 
+      wait_for:
+        host: "{{ ansible_default_ipv4.address }}"
+        port: 22
+        delay: 1
+        timeout: 120
+        search_regex: OpenSSH
+      delegate_to: bastion
+      when: reboot_hint.stdout.find("reboot") != -1

@@ -1,0 +1,23 @@
+- name: deploy database
+  gather_facts: false
+  hosts: appdbs
+  tasks:
+
+  - name: install postgres
+    yum:
+      name: postgresql-server
+      state: latest
+    become: true
+
+  - name: initilize postgres
+    command: postgresql-setup initdb
+    args:
+        creates: /var/lib/pgsql/data
+    become: true
+
+  - name: start postgres
+    service:
+      name: postgresql.service
+      state: started
+      enabled: yes
+    become: true

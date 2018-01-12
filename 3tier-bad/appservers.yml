@@ -1,0 +1,51 @@
+- name: deploy application
+  hosts: apps
+
+  tasks:
+  - name: install app and web server
+    yum:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+        - tomcat
+        - httpd
+    become: true
+
+  - name: enable app and web server at boot
+    service:
+      name: "{{ item }}"
+      enabled: yes
+    with_items:
+        - tomcat
+        - httpd
+    become: true
+
+  - name: create ansible tomcat directory
+    file:
+      path: "{{ apps_web_root }}"
+      state: directory
+      mode: 0755
+    become: true
+
+  - name: copy static index.html to tomcat "{{ apps_web_root }}"
+    template:
+      src: index.html.j2
+      dest: "{{ apps_web_root }}/index.html"
+      mode: 0644
+    notify: restart tomcat
+    become: true
+
+  - name: start apache
+    service:
+      name: httpd
+      state: started
+    become: true
+
+  handlers: 
+  - name: restart tomcat
+    service:
+      name: tomcat
+      state: restarted
+    become: true
+
+
