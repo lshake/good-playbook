@@ -33,7 +33,7 @@ roles/*
 # Except for requirements files
 !roles/requirements*.yml
 
-# Only store the sample inventory files
-hosts/*
-# Except for requirements files
-!hosts/sample*
+## Only store the sample inventory files
+#hosts/*
+## Except for requirements files
+#!hosts/sample*
