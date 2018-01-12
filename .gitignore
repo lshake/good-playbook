@@ -32,6 +32,7 @@ tower_cli_data/*
 roles/*
 # Except for requirements files
 !roles/requirements*.yml
+!roles/cleaner
 
 ## Only store the sample inventory files
 #hosts/*
