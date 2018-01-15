@@ -1,5 +1,5 @@
 [all:vars]
-GUID=707b
+GUID=599b
 
 [internal:vars]
 
@@ -16,16 +16,16 @@ appdbs
 
 [frontends]
 ## These are the frontends
-frontend1 ansible_host=frontend1."{{ GUID }}".internal
+frontend1 ansible_host="frontend1.{{ GUID }}.internal"
 
 [apps]
 ## These are the apps
-app1 ansible_host=app1."{{ GUID }}".internal
-app2 ansible_host=app2."{{ GUID }}".internal
+app1 ansible_host="app1.{{ GUID }}.internal"
+app2 ansible_host="app2.{{ GUID }}.internal"
 
 [appdbs]
 ## These are the appdbi(s)
-appdb1 ansible_host=appdb1."{{ GUID }}".internal
+appdb1 ansible_host="appdb1.{{ GUID }}.internal"
 
 [controller]
-bastion ansible_host=bastion."{{ GUID }}".example.opentlc.com ansible_user=lshakesp-redhat.com 
+bastion ansible_host="bastion.{{ GUID }}.example.opentlc.com" ansible_user=lshakesp-redhat.com 
