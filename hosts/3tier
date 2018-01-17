@@ -1,15 +1,9 @@
-[all:vars]
-GUID=599b
-
-[internal:vars]
-
-###########################################################################
-### Ansible Vars
-###########################################################################
+[3tier:vars]
+GUID=8846
 timeout=60
 ansible_ssh_user=ec2-user
 
-[internal:children]
+[3tier:children]
 frontends
 apps
 appdbs

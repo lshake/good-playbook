@@ -1,10 +1,17 @@
 ---
 - name: common configuration for all machines
-  hosts: internal
+  hosts: 3tier
+
+  pre_tasks: 
+    - name: remove the single yum repo file
+      file:
+        path: /etc/yum.repos.d/open_three-tier-app.repo
+        state: absent
+      become: true
 
   roles: 
     - { role: yum-repos, repos: "{{ yum_repos }}" }
-    - geerlingguy.repo-epel
+    - { role: geerlingguy.repo-epel, become: yes } 
 
   tasks: 
     - name: upgrade all packages

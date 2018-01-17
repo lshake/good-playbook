@@ -1,0 +1,2 @@
+jumpbox ansible_host=workstation-34e6.rhpds.opentlc.com ansible_user=lshakesp-redhat.com
+ctrl ansible_host=ctrl.example.com ansible_user=root

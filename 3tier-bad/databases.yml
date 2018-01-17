@@ -12,7 +12,7 @@
   - name: initilize postgres
     command: postgresql-setup initdb
     args:
-        creates: /var/lib/pgsql/data
+        creates: /var/lib/pgsql/data/PG_VERSION
     become: true
 
   - name: start postgres

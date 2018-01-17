@@ -1,0 +1,11 @@
+---
+- name: enable credssp
+  hosts: windows
+
+  pre_tasks: 
+    - name: enable credssp
+      win_shell: Enable-WSManCredSSP -Role Server -Force
+
+  roles:
+#     - win_ad_install
+    - win_package_install

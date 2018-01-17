@@ -1,0 +1,29 @@
+[towerproject:vars]
+GUID=7caf
+
+[towerhosts:vars]
+timeout=60
+ansible_user=ec2-user
+
+[windows:vars]
+ansible_connection=winrm
+ansible_port=5986
+ansible_user=admin
+ansible_winrm_server_cert_validation=ignore
+ansible_winrm_transport=credssp
+
+[towerproject:children]
+windows
+towercontroller
+towerhosts
+
+[windows]
+ad1 ansible_host="ad1.{{ GUID }}.example.opentlc.com"
+
+[towercontroller]
+bastion ansible_host="bastion.{{ GUID }}.example.opentlc.com" ansible_user=lshakesp-redhat.com 
+
+[towerhosts]
+tower1 ansible_host="tower1.{{ GUID }}.internal"
+tower2 ansible_host="tower2.{{ GUID }}.internal"
+tower3 ansible_host="tower3.{{ GUID }}.internal"

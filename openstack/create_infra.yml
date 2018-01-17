@@ -1,0 +1,153 @@
+---
+- name: create base openstack infra
+  hosts: jumpbox
+
+  vars:
+    real_vm_state: absent
+    instances: 
+        - name: app1
+          group: apps
+          env: QA
+          vm_state: "{{ real_vm_state }}"
+        - name: app2
+          group: apps
+          env: QA
+          vm_state: "{{ real_vm_state }}"
+        - name: db
+          group: appdbs
+          env: QA
+          vm_state: "{{ real_vm_state }}"
+        - name: frontend
+          group: frontends
+          env: QA
+          vm_state: "{{ real_vm_state }}"
+
+  tasks:
+    - name: create public network
+      os_network:
+        name: ext_network
+        cloud: ospcloud
+        state: present
+        external: true
+
+    - name: create external subnet
+      os_subnet:
+        name: extsubnet
+        cloud: ospcloud
+        state: absent
+        network_name: ext_network
+        cidr: 10.10.10.0/24
+        dns_nameservers:
+           - 8.8.8.7
+           - 8.8.8.8
+        host_routes: 
+            - destination: 0.0.0.0/0
+              nexthop: 10.10.10.0
+            - destination: 192.168.0.0/24
+              nexthop: 192.168.0.0            
+
+    - name: create internal network
+      os_network:
+        name: int_network
+        cloud: ospcloud
+        state: absent
+        external: false
+
+    - name: create external subnet
+      os_subnet:
+        name: intsubnet
+        cloud: ospcloud
+        state: absent
+        network_name: int_network
+        cidr: 20.20.20.0/24
+        dns_nameservers:
+           - 8.8.8.7
+           - 8.8.8.8
+        host_routes:
+           - destination: 0.0.0.0/0
+             nexthop: 192.168.0.0
+           - destination: 192.168.0.0/24
+             nexthop: 192.168.0.0
+ 
+#    - name: create router
+#      os_router:
+#        name: router1
+#        cloud: ospcloud
+#        state: absent
+#        network: ext_network
+#        interfaces:
+#            - intsubnet
+#        external_fixed_ips:
+#            - subnet: extsubnet
+#      tags: routers
+
+
+    - name: create an ansible key
+      os_keypair:
+        cloud: ospcloud
+        state: absent
+        name: ansible_key
+        public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvofm3QZWhAOP1ym3SSGXyhXr0hQirrLyUU0tounGVVJ4WuSaDhlydmvlyZ/cdhaYq5YStxtn9NfP3Br8Jvfz02J9gwAGoLyzXJ6IEe3Rz1iyILQoxILpQ/hN2cYcLKMeWpnG4hNIF0N+3wph4YVHXN85IzVrK9vaJiwQ/aIPtw6dMMbHF1X+yRzppJtPOMJSq7MP1nt2/gkzh4AWUZxkxKQLinwWqyBFItnlHKe5YOdNaC1JPFETkvvWI2/aGOH4sdnToN1rseQYE4KotEkX7VGBHu7YqaWYuOQwxnaBaOxQn/70wE3Z4X+9TNr7ao6h9MJrdt3Vx6FxRQR6lpu6WQ== lee@deepblue"
+
+    - name: create labflavor flavor
+      os_nova_flavor:
+        cloud: ospcloud
+        state: absent
+        name: labflavor
+        ram: 2048
+        vcpus: 1
+        disk: 10
+
+    - name: create security groups
+      os_security_group:
+        cloud: ospcloud
+        state: absent
+        name: "{{ item.group }}"
+        description: "Security group for {{ item.group }} machines"
+      with_items: "{{ instances }}"
+
+#    - name: create security rules for ping 
+#      os_security_group_rule:
+#        cloud: ospcloud
+#        security_group: "{{ item.group }}"
+#        protocol: icmp
+#        remote_ip_prefix: 0.0.0.0/0
+#      with_items: "{{ instances }}"
+#
+#    - name: create security rules for all ports 
+#      os_security_group_rule:
+#        cloud: ospcloud
+#        security_group: "{{ item.group }}"
+#        protocol: tcp
+#        port_range_min: 1
+#        port_range_max: 65535
+#        remote_ip_prefix: 0.0.0.0/0
+#      with_items: "{{ instances }}"
+
+    - name: create instances
+      os_server:
+        state: "{{ item.vm_state }}"
+        cloud: ospcloud
+        name: "{{ item.name }}"
+        image: rhel-guest
+        key_name: ansible_key
+        timeout: 200
+        flavor: labflavor
+        nics:
+            - net-name: int_network
+            - net-name: ext_network
+        meta:
+            hostname: "{{ item.name }}"
+            group: "{{ item.group }}"
+            deployment_name: "{{ item.env }}"
+        security_groups: 
+            - "{{ item.group }}"
+      with_items: "{{ instances }}"
+      register: vms
+      tags: vm_instances
+
+    - name: debug vms
+      debug:
+        var: vms
+        verbosity: 2
+          
