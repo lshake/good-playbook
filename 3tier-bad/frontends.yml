@@ -3,6 +3,10 @@
   hosts: frontends
 
   tasks:
+  - name: debug apps group
+    debug: 
+      var: groups['apps']
+
   - name: install frontend packages
     yum:
       name: haproxy 

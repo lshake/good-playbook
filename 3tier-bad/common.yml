@@ -1,8 +1,22 @@
 ---
+- name: turn off pipelining and disable tty from sudoers
+  hosts: 3tier
+
+  vars:
+    ansible_ssh_pipelining: false
+
+  tasks:
+    - name: remove requiretty from sudoers
+      lineinfile:
+        dest: /etc/sudoers
+        state: absent
+        regexp: '^Defaults\s+requiretty'
+      become: true
+
 - name: common configuration for all machines
   hosts: 3tier
 
-  pre_tasks: 
+  pre_tasks:
     - name: remove the single yum repo file
       file:
         path: /etc/yum.repos.d/open_three-tier-app.repo
@@ -46,3 +60,7 @@
         search_regex: OpenSSH
       delegate_to: bastion
       when: reboot_hint.stdout.find("reboot") != -1
+
+    - name: debug hostvars
+      debug: 
+        var: hostvars

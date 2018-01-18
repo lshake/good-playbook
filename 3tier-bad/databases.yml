@@ -1,6 +1,10 @@
 - name: deploy database
   gather_facts: false
   hosts: appdbs
+
+  vars:
+    ansible_ssh_pipelining: false
+    
   tasks:
 
   - name: install postgres

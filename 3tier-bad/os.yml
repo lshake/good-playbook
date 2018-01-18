@@ -32,3 +32,4 @@
        name: osp-facts
     tags:
      - test_inventory
+    
