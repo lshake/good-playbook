@@ -33,6 +33,7 @@ roles/*
 # Except for requirements files
 !roles/requirements*.yml
 !roles/cleaner
+!roles/osp*
 
 ## Only store the sample inventory files
 #hosts/*
