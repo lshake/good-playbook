@@ -1,0 +1,6 @@
+---
+- import_playbook: 3tier-bad/os.yml
+- import_playbook: 3tier-bad/common.yml
+- import_playbook: 3tier-bad/frontends.yml
+- import_playbook: 3tier-bad/databases.yml
+- import_playbook: 3tier-bad/appservers.yml

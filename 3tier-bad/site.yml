@@ -1,6 +1,0 @@
----
-- import_playbook: os.yml
-- import_playbook: common.yml
-- import_playbook: frontends.yml
-- import_playbook: databases.yml
-- import_playbook: appservers.yml
