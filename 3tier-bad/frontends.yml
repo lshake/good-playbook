@@ -1,4 +1,9 @@
 ---
+- name: setup on app server hosts to get hostvars
+  hosts: apps
+  tasks:
+    - setup:
+
 - name: deploy haproxy
   hosts: frontends
 
